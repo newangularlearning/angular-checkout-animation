@@ -1,0 +1,78 @@
+<div class="page">
+  <header class="bar">
+    <div class="logo"><span class="dot"></span>fullstack<b>.pay</b></div>
+    <div class="secure">
+      <svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3" /><rect x="5" y="11" width="14" height="10" rx="2" /></svg>
+      Secure checkout
+    </div>
+    <div class="order">Order #FS-2048 · <b>₹2,499</b></div>
+  </header>
+
+  <main class="stage" [@checkoutFlow]="flow()">
+    <section class="card-wrap" [class.centered]="stage() !== 'form'">
+      <div class="card" [@cardFlip]="flipped() ? 'back' : 'front'">
+        <div class="face front">
+          <div class="glow"></div>
+          <div class="row top">
+            <div class="chip"><i></i><i></i><i></i></div>
+            <svg class="nfc" viewBox="0 0 24 24"><path d="M8 7a7 7 0 0 1 0 10M12 5a10 10 0 0 1 0 14M16 3a13 13 0 0 1 0 18" /></svg>
+            <div class="brand" [attr.data-b]="brand()">
+              @switch (brand()) {
+                @case ('nova') { <span class="bars"><i></i><i></i><i></i></span>NOVA }
+                @case ('orbit') { <span class="hex"></span>ORBIT }
+                @case ('axis') { <span class="tri"></span>AXIS }
+                @default { <span class="ring"></span>CARD }
+              }
+            </div>
+          </div>
+          <div class="num">{{ cardNumber() }}</div>
+          <div class="row bottom">
+            <div><small>CARD HOLDER</small><span>{{ name() || 'YOUR NAME' }}</span></div>
+            <div><small>EXPIRES</small><span>{{ expiry() || 'MM/YY' }}</span></div>
+          </div>
+        </div>
+        <div class="face back">
+          <div class="stripe"></div>
+          <div class="sig"><span class="scribble"></span><b>{{ cvc() || '•••' }}</b></div>
+          <p>Authorised signature · not valid unless signed</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="form" [class.gone]="stage() !== 'form'">
+      <h2>Payment details</h2>
+      <label>Cardholder Name
+        <input id="name" autocomplete="off" placeholder="Name on card"
+          (input)="onName($any($event.target).value)" (focus)="flipped.set(false)" />
+      </label>
+      <label>Card Number
+        <input id="number" autocomplete="off" inputmode="numeric" placeholder="0000 0000 0000 0000"
+          #n (input)="onNumber(n)" (focus)="flipped.set(false)" />
+      </label>
+      <div class="two">
+        <label>Expiry
+          <input id="expiry" autocomplete="off" placeholder="MM/YY" #e (input)="onExpiry(e)" (focus)="flipped.set(false)" />
+        </label>
+        <label>CVC
+          <span class="lock-in">
+            <input id="cvc" autocomplete="off" placeholder="•••" #c
+              (input)="onCvc(c)" (focus)="flipped.set(true)" (blur)="flipped.set(false)" />
+            <svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3" /><rect x="5" y="11" width="14" height="10" rx="2" /></svg>
+          </span>
+        </label>
+      </div>
+      <button id="pay" (click)="pay()">Pay ₹2,499</button>
+    </section>
+
+    @if (stage() === 'processing') {
+      <div class="status processing"><span class="spin"></span>Processing secure transaction…</div>
+    }
+    @if (stage() === 'done') {
+      <div class="status done" @successPop>
+        <div class="check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></div>
+        <p class="t">Payment Successful!</p>
+        <p class="s">₹2,499 paid · Ref FS-2048</p>
+      </div>
+    }
+  </main>
+</div>
